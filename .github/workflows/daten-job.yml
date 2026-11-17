@@ -4,8 +4,9 @@ name: Daten-Job
 
 on:
   schedule:
-    # Jede Stunde um :52. Ein Lauf von ICON-D2-RUC ist rund 47 Minuten nach dem Start bis +8 h vollständig.
-    - cron: "52 * * * *"
+    # Jede Stunde um :52: Ein Lauf von ICON-D2-RUC ist rund 47 Minuten nach dem Start bis +8 h vollständig.
+    # Dazu :22 als Reserve, weil GitHub geplante Läufe gelegentlich auslässt (er liefert dann denselben Lauf noch einmal).
+    - cron: "22,52 * * * *"
   workflow_dispatch:
     inputs:
       stoerung_probe:
