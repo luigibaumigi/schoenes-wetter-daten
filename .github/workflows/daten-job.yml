@@ -7,6 +7,11 @@ on:
     # Jede Stunde um :52. Ein Lauf von ICON-D2-RUC ist rund 47 Minuten nach dem Start bis +8 h vollständig.
     - cron: "52 * * * *"
   workflow_dispatch:
+    inputs:
+      stoerung_probe:
+        description: "Absichtlich scheitern lassen (prüft die Störungsmeldung)"
+        type: boolean
+        default: false
   push:
     branches: [main]
 
@@ -29,6 +34,12 @@ jobs:
       url: ${{ steps.veroeffentlichen.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Probe-Störung
+        if: ${{ inputs.stoerung_probe }}
+        run: |
+          echo "Absichtlicher Fehlschlag, um die Störungsmeldung zu prüfen."
+          exit 1
 
       - uses: actions/setup-python@v7
         with:
@@ -73,7 +84,7 @@ jobs:
           offen=$(gh issue list --label stoerung --state open --json number --jq '.[0].number // empty')
           lauf="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           if [ -z "$offen" ]; then
-            gh issue create --label stoerung --title "Daten-Job gestört" --body "Der Daten-Job ist gescheitert: $lauf
+            gh issue create --label stoerung --assignee "${{ github.repository_owner }}" --title "Daten-Job gestört" --body "@${{ github.repository_owner }} Der Daten-Job ist gescheitert: $lauf
 
           Die App zeigt bis zur Behebung die zuletzt veröffentlichten Wolken und Wind, bis sie zu alt sind.
           Dieses Thema schließt sich von selbst, sobald ein Lauf wieder klappt. Weitere Fehlschläge melden sich hier nicht erneut."
